@@ -11,12 +11,25 @@ Quick path:
 3. Use tabs on mobile: **Career Assistant** | Fit Dashboard | Documents
 4. On desktop: 3-column workspace with chat on the right
 
-Screenshots (add after running locally):
+### Screenshots
 
-- Upload screen — `/upload`
-- Fit dashboard — center panel on `/dashboard`
-- Career Assistant — right panel (desktop) or **Career Assistant** tab (mobile)
-- Skill gap analysis — Fit Dashboard tab
+Captured with demo data (Alex Rivera resume + 3 job descriptions).
+
+**Landing page** — aurora dark theme with feature overview
+
+![CareerFit AI landing page](docs/screenshots/landing.png)
+
+**Upload** — resume + job descriptions with one-click demo seed
+
+![Upload documents with demo data loaded](docs/screenshots/upload-with-documents.png)
+
+**Decision workspace** — 3-column desktop layout with fit scores, skill gaps, and document preview
+
+![Dashboard with multi-job fit scoring](docs/screenshots/dashboard-desktop.png)
+
+**Career Assistant** — grounded RAG chat with citations and evidence panel
+
+![Career Assistant with grounded answer and retrieved chunks](docs/screenshots/career-assistant.png)
 
 ## Quick Start
 
