@@ -1,0 +1,65 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum DocumentType {
+  RESUME
+  JOB_DESCRIPTION
+}
+
+model Session {
+  id          String     @id @default(uuid())
+  createdAt   DateTime   @default(now())
+  preferences Json?
+  documents   Document[]
+  analyses    Analysis[]
+}
+
+model Document {
+  id        String       @id @default(uuid())
+  sessionId String
+  session   Session      @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  type      DocumentType
+  name      String
+  rawText   String       @db.Text
+  metadata  Json?
+  createdAt DateTime     @default(now())
+  chunks    Chunk[]
+
+  @@index([sessionId])
+}
+
+model Chunk {
+  id         String     @id @default(uuid())
+  documentId String
+  document   Document   @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  content    String     @db.Text
+  section    String?
+  chunkIndex Int
+  metadata   Json?
+  embedding  Embedding?
+
+  @@index([documentId])
+}
+
+model Embedding {
+  id      String  @id @default(uuid())
+  chunkId String  @unique
+  chunk   Chunk   @relation(fields: [chunkId], references: [id], onDelete: Cascade)
+  vector  Float[]
+}
+
+model Analysis {
+  id        String   @id @default(uuid())
+  sessionId String
+  session   Session  @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  results   Json
+  createdAt DateTime @default(now())
+
+  @@index([sessionId])
+}

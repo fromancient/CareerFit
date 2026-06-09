@@ -1,0 +1,25 @@
+Full Stack Engineer — BrightCart
+
+About the Company
+BrightCart is a fast-growing e-commerce platform serving mid-market retailers.
+
+Responsibilities
+- Build customer-facing features in React and Next.js
+- Develop Node.js APIs and integrate third-party payment providers
+- Participate in sprint planning, code reviews, and on-call rotation
+- Improve frontend performance and accessibility
+
+Requirements
+- 3+ years of full stack development experience
+- Strong React and TypeScript skills
+- Experience with Node.js and REST APIs
+- Familiarity with PostgreSQL or similar relational databases
+- Understanding of modern CI/CD workflows
+
+Preferred
+- Next.js App Router experience
+- AWS deployment experience
+- E-commerce or payments domain knowledge
+
+Location: Remote
+Salary: $120,000 – $145,000

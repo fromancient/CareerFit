@@ -1,0 +1,25 @@
+Senior Backend Engineer — CloudScale Inc.
+
+About the Company
+CloudScale is a Series B infrastructure startup helping enterprises modernize legacy systems.
+
+Responsibilities
+- Design and build scalable backend services handling millions of requests per day
+- Lead technical design reviews and mentor mid-level engineers
+- Collaborate with product and platform teams on API contracts and SLAs
+- Drive reliability improvements and incident response practices
+
+Requirements
+- 5+ years of backend engineering experience
+- Strong proficiency in Python and/or Go
+- Production experience with Kubernetes and AWS
+- Deep knowledge of PostgreSQL and distributed systems
+- Experience with message queues (Kafka or similar)
+
+Preferred
+- GraphQL API design experience
+- Terraform or infrastructure-as-code background
+- SOC2 or compliance-aware system design
+
+Location: Remote (US)
+Salary: $160,000 – $195,000

@@ -1,0 +1,30 @@
+ALEX RIVERA
+Senior Backend Engineer | alex.rivera@email.com | San Francisco, CA
+
+Summary
+Backend engineer with 8 years of experience building distributed systems, APIs, and data pipelines.
+Strong background in Python, Go, PostgreSQL, and cloud infrastructure on AWS.
+
+Experience
+
+Senior Software Engineer — Finova Payments (2021–Present)
+- Led migration of monolithic payment service to Kubernetes on AWS EKS
+- Designed event-driven architecture using Kafka for real-time transaction processing
+- Reduced API latency by 40% through query optimization and Redis caching
+- Mentored 3 junior engineers on system design and code review practices
+
+Software Engineer — DataStream Analytics (2017–2021)
+- Built REST and GraphQL APIs serving 2M+ daily requests
+- Implemented CI/CD pipelines with Terraform and GitHub Actions
+- Migrated legacy MySQL workloads to PostgreSQL with zero downtime
+
+Projects
+- Open-source contributor to a Python async task queue library (1.2k GitHub stars)
+- Built internal RAG prototype for searching engineering documentation
+
+Skills
+Python, Go, TypeScript, PostgreSQL, Redis, Kafka, Kubernetes, Docker, AWS, Terraform,
+REST, GraphQL, CI/CD, Microservices
+
+Education
+BS Computer Science — University of California, Berkeley (2017)

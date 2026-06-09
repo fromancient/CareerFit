@@ -1,0 +1,25 @@
+Staff Platform Engineer — Nexus AI
+
+About the Company
+Nexus AI builds enterprise LLM applications for regulated industries.
+
+Responsibilities
+- Architect platform services for model serving, RAG pipelines, and observability
+- Define standards for API design, deployment, and on-call rotation
+- Partner with ML engineers on embedding pipelines and vector search infrastructure
+- Own reliability targets for core platform services (99.9% uptime)
+
+Requirements
+- 8+ years of software engineering experience, including staff-level scope
+- Expert-level Kubernetes and cloud-native operations (AWS or GCP)
+- Strong Python and TypeScript skills
+- Experience building and operating vector search or RAG systems
+- Track record of technical leadership across multiple teams
+
+Preferred
+- Experience with pgvector, Pinecone, or similar vector databases
+- OpenTelemetry and production observability at scale
+- Prior work in fintech, healthcare, or other regulated domains
+
+Location: San Francisco, CA (hybrid)
+Salary: $200,000 – $250,000
