@@ -6,6 +6,7 @@ import { sanitizeUploadedText } from "@/lib/documents/normalize";
 import {
   createChunksWithEmbeddings,
   createDocument,
+  deleteDocument,
 } from "@/lib/db/queries";
 import type { UploadResult } from "@/lib/types";
 
@@ -24,29 +25,34 @@ async function ingestRawText(params: {
     metadata: params.metadata,
   });
 
-  const chunks = chunkDocument(
-    params.rawText,
-    params.type as "RESUME" | "JOB_DESCRIPTION",
-  );
-  const embeddings = await embedTexts(chunks.map((c) => c.content));
+  try {
+    const chunks = chunkDocument(
+      params.rawText,
+      params.type as "RESUME" | "JOB_DESCRIPTION",
+    );
+    const embeddings = await embedTexts(chunks.map((c) => c.content));
 
-  await createChunksWithEmbeddings(
-    document.id,
-    chunks.map((chunk, i) => ({
-      content: chunk.content,
-      section: chunk.section,
-      chunkIndex: chunk.chunkIndex,
-      metadata: chunk.metadata,
-      embedding: embeddings[i],
-    })),
-  );
+    await createChunksWithEmbeddings(
+      document.id,
+      chunks.map((chunk, i) => ({
+        content: chunk.content,
+        section: chunk.section,
+        chunkIndex: chunk.chunkIndex,
+        metadata: chunk.metadata,
+        embedding: embeddings[i],
+      })),
+    );
 
-  return {
-    documentId: document.id,
-    name: document.name,
-    type: params.type as "RESUME" | "JOB_DESCRIPTION",
-    chunkCount: chunks.length,
-  };
+    return {
+      documentId: document.id,
+      name: document.name,
+      type: params.type as "RESUME" | "JOB_DESCRIPTION",
+      chunkCount: chunks.length,
+    };
+  } catch (error) {
+    await deleteDocument(document.id, params.sessionId);
+    throw error;
+  }
 }
 
 export async function ingestDocument(params: {

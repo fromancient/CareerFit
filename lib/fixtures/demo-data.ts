@@ -8,19 +8,19 @@ export interface DemoDocument {
 }
 
 export const DEMO_DOCUMENTS: DemoDocument[] = [
-  { name: "Alex Rivera — Resume", type: "RESUME", filename: "sample-resume.txt" },
+  { name: "Alex Rivera - Resume", type: "RESUME", filename: "sample-resume.txt" },
   {
-    name: "CloudScale — Senior Backend Engineer",
+    name: "CloudScale - Senior Backend Engineer",
     type: "JOB_DESCRIPTION",
     filename: "job-backend-senior.txt",
   },
   {
-    name: "Nexus AI — Staff Platform Engineer",
+    name: "Nexus AI - Staff Platform Engineer",
     type: "JOB_DESCRIPTION",
     filename: "job-platform-staff.txt",
   },
   {
-    name: "BrightCart — Full Stack Engineer",
+    name: "BrightCart - Full Stack Engineer",
     type: "JOB_DESCRIPTION",
     filename: "job-fullstack-mid.txt",
   },

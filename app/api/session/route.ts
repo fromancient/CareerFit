@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import {
+  deleteAllSessionDocuments,
   deleteDocument,
   getLatestAnalysis,
   getSessionDocuments,
@@ -60,9 +61,18 @@ export async function DELETE(request: Request) {
   try {
     const sessionId = await getSessionId();
     const { searchParams } = new URL(request.url);
+
+    if (searchParams.get("all") === "true") {
+      await deleteAllSessionDocuments(sessionId);
+      return NextResponse.json({ ok: true, cleared: true });
+    }
+
     const documentId = searchParams.get("documentId");
     if (!documentId) {
-      return NextResponse.json({ error: "documentId required." }, { status: 400 });
+      return NextResponse.json(
+        { error: "documentId or all=true required." },
+        { status: 400 },
+      );
     }
     const deleted = await deleteDocument(documentId, sessionId);
     if (!deleted) {

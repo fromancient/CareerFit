@@ -4,12 +4,19 @@ CareerFit AI is a fullstack conversational AI assistant that analyzes a resume a
 
 ## Demo
 
+Quick path:
+
+1. Open `/upload` → **Load demo documents**
+2. Auto-redirects to `/dashboard` with fit analysis
+3. Use tabs on mobile: **Career Assistant** | Fit Dashboard | Documents
+4. On desktop: 3-column workspace with chat on the right
+
 Screenshots (add after running locally):
 
 - Upload screen — `/upload`
-- Fit dashboard — `/dashboard`
-- Chat with citations — right panel on dashboard
-- Skill gap analysis — center panel on dashboard
+- Fit dashboard — center panel on `/dashboard`
+- Career Assistant — right panel (desktop) or **Career Assistant** tab (mobile)
+- Skill gap analysis — Fit Dashboard tab
 
 ## Quick Start
 

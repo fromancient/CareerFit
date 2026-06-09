@@ -16,6 +16,7 @@ import type {
   SessionPreferences,
 } from "@/lib/types";
 import { CHAT_MODEL } from "@/lib/constants";
+import { canRunAnalysis } from "@/lib/documents/indexed";
 import { getSessionDocuments } from "@/lib/db/queries";
 
 const fitSchema = z.object({
@@ -48,12 +49,16 @@ export async function generateFitAnalysis(params: {
   preferences?: SessionPreferences;
 }): Promise<AnalysisResults> {
   const documents = await getSessionDocuments(params.sessionId);
-  const resume = documents.find((d) => d.type === "RESUME");
-  const jobs = documents.filter((d) => d.type === "JOB_DESCRIPTION");
+  const indexed = documents.filter((d) => d._count.chunks > 0);
 
-  if (!resume || jobs.length === 0) {
-    throw new Error("Upload a resume and at least one job description first.");
+  if (!canRunAnalysis(indexed.map((d) => ({ ...d, chunkCount: d._count.chunks })))) {
+    throw new Error(
+      "Upload an indexed resume and at least one job description first.",
+    );
   }
+
+  const resume = indexed.find((d) => d.type === "RESUME")!;
+  const jobs = indexed.filter((d) => d.type === "JOB_DESCRIPTION");
 
   const prefStr = preferencesToString(params.preferences);
   const jobResults: FitAnalysisResult[] = [];

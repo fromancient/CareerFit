@@ -29,7 +29,7 @@ export default function RootLayout({
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col bg-background text-foreground">
-        {children}
+        <div className="aurora-page flex flex-col flex-1 min-h-full">{children}</div>
       </body>
     </html>
   );

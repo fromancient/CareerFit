@@ -1,9 +1,10 @@
 "use client";
 
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
+import { AppHeader } from "@/components/ui/AppHeader";
 import { UploadDropzone } from "@/components/UploadDropzone";
+import { clearAllChatHistoriesForSession } from "@/lib/chat/storage";
 import { MAX_JOB_DESCRIPTIONS } from "@/lib/constants";
 
 interface DocumentItem {
@@ -47,9 +48,14 @@ export default function UploadPage() {
     };
   }, []);
 
-  const hasResume = documents.some((d) => d.type === "RESUME");
-  const jobCount = documents.filter((d) => d.type === "JOB_DESCRIPTION").length;
+  const indexedDocuments = documents.filter((d) => d.chunkCount > 0);
+  const brokenDocuments = documents.filter((d) => d.chunkCount === 0);
+  const hasResume = indexedDocuments.some((d) => d.type === "RESUME");
+  const jobCount = indexedDocuments.filter(
+    (d) => d.type === "JOB_DESCRIPTION",
+  ).length;
   const canContinue = hasResume && jobCount >= 1;
+  const canLoadDemo = indexedDocuments.length === 0;
 
   const handleUploaded = () => {
     loadSession();
@@ -65,7 +71,17 @@ export default function UploadPage() {
 
   const goToDashboard = async () => {
     await savePreferences();
-    router.push("/dashboard");
+    router.push("/dashboard?analyze=1");
+  };
+
+  const clearAllDocuments = async () => {
+    const sessionRes = await fetch("/api/session");
+    const sessionData = await sessionRes.json();
+    if (sessionData.sessionId) {
+      clearAllChatHistoriesForSession(sessionData.sessionId);
+    }
+    await fetch("/api/session?all=true", { method: "DELETE" });
+    await loadSession();
   };
 
   const loadDemoData = async () => {
@@ -76,6 +92,7 @@ export default function UploadPage() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error ?? "Failed to load demo data");
       await loadSession();
+      router.push("/dashboard?analyze=1");
     } catch (err) {
       setSeedError(err instanceof Error ? err.message : "Demo load failed");
     } finally {
@@ -84,38 +101,32 @@ export default function UploadPage() {
   };
 
   return (
-    <main className="flex-1">
-      <header className="border-b border-border bg-card">
-        <div className="max-w-4xl mx-auto px-6 py-4 flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-2">
-            <div className="h-8 w-8 rounded-lg bg-accent flex items-center justify-center text-white font-bold text-sm">
-              CF
-            </div>
-            <span className="font-semibold">CareerFit AI</span>
-          </Link>
-          <span className="text-sm text-muted">Step 1 · Upload</span>
-        </div>
-      </header>
+    <main className="flex-1 relative">
+      <div className="orb w-64 h-64 bg-violet-500/15 top-10 right-10" />
 
-      <div className="max-w-4xl mx-auto px-6 py-10 space-y-8">
+      <AppHeader subtitle="Step 1 · Upload" />
+
+      <div className="max-w-4xl mx-auto px-6 py-10 space-y-8 relative">
         <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
           <div>
-            <h1 className="text-2xl font-bold">Upload your documents</h1>
-            <p className="text-muted mt-1">
+            <h1 className="text-2xl sm:text-3xl font-bold">
+              Upload your <span className="text-gradient">documents</span>
+            </h1>
+            <p className="text-muted mt-2">
               Add one resume and up to {MAX_JOB_DESCRIPTIONS} job descriptions.
             </p>
           </div>
           <button
             type="button"
             onClick={loadDemoData}
-            disabled={seeding || documents.length > 0}
-            className="rounded-lg border border-accent text-accent px-4 py-2 text-sm font-medium hover:bg-indigo-50 disabled:opacity-50 transition-colors shrink-0"
+            disabled={seeding || !canLoadDemo}
+            className="btn-secondary shrink-0"
           >
             {seeding ? "Loading demo…" : "Load demo documents"}
           </button>
         </div>
         {seedError && (
-          <p className="text-sm text-danger" role="alert">
+          <p className="alert-error rounded-xl px-4 py-3 text-sm" role="alert">
             {seedError}
           </p>
         )}
@@ -128,7 +139,7 @@ export default function UploadPage() {
               label="Resume"
               description="Your current resume (PDF, DOCX, or TXT)"
               documentType="RESUME"
-              disabled={hasResume}
+              disabled={hasResume || documents.some((d) => d.type === "RESUME" && d.chunkCount > 0)}
               onUploaded={handleUploaded}
             />
 
@@ -136,27 +147,64 @@ export default function UploadPage() {
               label="Job Descriptions"
               description={`Add ${jobCount}/${MAX_JOB_DESCRIPTIONS} roles to compare`}
               documentType="JOB_DESCRIPTION"
-              disabled={jobCount >= MAX_JOB_DESCRIPTIONS}
+              disabled={
+                documents.filter(
+                  (d) => d.type === "JOB_DESCRIPTION" && d.chunkCount > 0,
+                ).length >= MAX_JOB_DESCRIPTIONS
+              }
               onUploaded={handleUploaded}
             />
 
+            {brokenDocuments.length > 0 && (
+              <div className="alert-warning rounded-2xl p-4 text-sm">
+                {brokenDocuments.length} document(s) failed indexing (likely an API
+                error). Clear them and try again.
+                <button
+                  type="button"
+                  onClick={clearAllDocuments}
+                  className="ml-2 font-medium underline"
+                >
+                  Clear all documents
+                </button>
+              </div>
+            )}
+
             {documents.length > 0 && (
-              <div className="rounded-xl border border-border bg-card p-5">
-                <h3 className="font-semibold mb-3">Uploaded</h3>
+              <div className="glass-panel rounded-2xl p-5">
+                <div className="flex items-center justify-between mb-3">
+                  <h3 className="font-semibold">Uploaded</h3>
+                  {indexedDocuments.length > 0 && (
+                    <button
+                      type="button"
+                      onClick={clearAllDocuments}
+                      className="text-xs text-muted hover:text-rose-400"
+                    >
+                      Clear all
+                    </button>
+                  )}
+                </div>
                 <ul className="space-y-2 text-sm">
                   {documents.map((d) => (
                     <li key={d.id} className="flex justify-between">
                       <span>
                         {d.type === "RESUME" ? "Resume" : "Job"}: {d.name}
                       </span>
-                      <span className="text-muted">{d.chunkCount} chunks</span>
+                      <span
+                        className={
+                          d.chunkCount === 0 ? "text-danger" : "text-muted"
+                        }
+                      >
+                        {d.chunkCount === 0
+                          ? "indexing failed"
+                          : `${d.chunkCount} chunks`}
+                      </span>
                     </li>
                   ))}
                 </ul>
               </div>
             )}
 
-            <div className="rounded-xl border border-border bg-card p-5">
+            <div className="glass-panel rounded-2xl p-5">
               <h3 className="font-semibold mb-3">
                 Target Preferences{" "}
                 <span className="text-muted font-normal text-sm">(optional)</span>
@@ -178,7 +226,7 @@ export default function UploadPage() {
                         setPreferences((p) => ({ ...p, [key]: e.target.value }))
                       }
                       placeholder={placeholder}
-                      className="mt-1 w-full rounded-lg border border-border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent/30"
+                      className="glass-input mt-1 w-full rounded-xl px-3 py-2.5 text-sm text-foreground placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-cyan-400/30"
                     />
                   </label>
                 ))}
@@ -190,7 +238,7 @@ export default function UploadPage() {
                 type="button"
                 onClick={goToDashboard}
                 disabled={!canContinue}
-                className="rounded-lg bg-accent px-6 py-3 text-sm font-medium text-white hover:bg-accent-hover disabled:opacity-50 transition-colors"
+                className="btn-primary px-6 py-3"
               >
                 Continue to Dashboard →
               </button>

@@ -96,6 +96,30 @@ export async function saveAnalysis(
   });
 }
 
+export async function deleteAllSessionDocuments(sessionId: string) {
+  await prisma.document.deleteMany({ where: { sessionId } });
+}
+
+export async function deleteUnindexedSessionDocuments(sessionId: string) {
+  const docs = await prisma.document.findMany({
+    where: { sessionId },
+    include: { _count: { select: { chunks: true } } },
+  });
+  const unindexed = docs.filter((d) => d._count.chunks === 0);
+  if (unindexed.length === 0) return 0;
+  await prisma.document.deleteMany({
+    where: { id: { in: unindexed.map((d) => d.id) } },
+  });
+  return unindexed.length;
+}
+
+export async function getDocumentById(documentId: string, sessionId: string) {
+  return prisma.document.findFirst({
+    where: { id: documentId, sessionId },
+    include: { _count: { select: { chunks: true } } },
+  });
+}
+
 export async function deleteDocument(documentId: string, sessionId: string) {
   const doc = await prisma.document.findFirst({
     where: { id: documentId, sessionId },

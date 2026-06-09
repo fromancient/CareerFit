@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { generateFitAnalysis } from "@/lib/ai/generate-answer";
+import { formatApiError } from "@/lib/api/errors";
 import { saveAnalysis } from "@/lib/db/queries";
 import { getSessionId } from "@/lib/session";
 
@@ -34,9 +35,10 @@ export async function POST(request: Request) {
 
     return NextResponse.json(results);
   } catch (error) {
-    const message =
-      error instanceof Error ? error.message : "Analysis failed.";
     console.error("[analyze]", error);
-    return NextResponse.json({ error: message }, { status: 400 });
+    return NextResponse.json(
+      { error: formatApiError(error, "Analysis failed.") },
+      { status: 400 },
+    );
   }
 }

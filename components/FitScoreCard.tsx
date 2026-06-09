@@ -1,15 +1,9 @@
 import type { FitAnalysisResult } from "@/lib/types";
 
-function scoreColor(score: number): string {
-  if (score >= 80) return "text-success";
-  if (score >= 60) return "text-warning";
-  return "text-danger";
-}
-
-function scoreBg(score: number): string {
-  if (score >= 80) return "bg-emerald-50 border-emerald-200";
-  if (score >= 60) return "bg-amber-50 border-amber-200";
-  return "bg-red-50 border-red-200";
+function scoreClass(score: number): string {
+  if (score >= 80) return "score-high";
+  if (score >= 60) return "score-mid";
+  return "score-low";
 }
 
 interface FitScoreCardProps {
@@ -19,20 +13,15 @@ interface FitScoreCardProps {
   onSelect?: () => void;
 }
 
-export function FitScoreCard({
-  result,
-  rank,
-  selected,
-  onSelect,
-}: FitScoreCardProps) {
+export function FitScoreCard({ result, rank, selected, onSelect }: FitScoreCardProps) {
   return (
     <button
       type="button"
       onClick={onSelect}
-      className={`w-full text-left rounded-xl border p-4 transition-all ${
+      className={`w-full text-left rounded-2xl p-4 transition-all ${
         selected
-          ? "border-accent ring-2 ring-accent/20 shadow-md"
-          : "border-border bg-card hover:border-accent/40 hover:shadow-sm"
+          ? "glass-panel holo-border shadow-[0_0_30px_rgba(34,211,238,0.15)]"
+          : "glass-panel hover:bg-white/[0.06] hover:border-cyan-400/20"
       }`}
     >
       <div className="flex items-start justify-between gap-3">
@@ -43,11 +32,9 @@ export function FitScoreCard({
           <h3 className="font-semibold truncate mt-0.5">{result.jobName}</h3>
         </div>
         <div
-          className={`shrink-0 rounded-lg border px-3 py-1.5 ${scoreBg(result.overall_fit_score)}`}
+          className={`shrink-0 rounded-xl px-3 py-1.5 border ${scoreClass(result.overall_fit_score)}`}
         >
-          <span
-            className={`text-2xl font-bold tabular-nums ${scoreColor(result.overall_fit_score)}`}
-          >
+          <span className="text-2xl font-bold tabular-nums">
             {result.overall_fit_score}
           </span>
         </div>

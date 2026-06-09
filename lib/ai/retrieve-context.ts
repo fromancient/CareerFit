@@ -1,49 +1,34 @@
 import { DocumentType } from "@prisma/client";
 import { embedText } from "./embeddings";
+import {
+  extractQueryTerms,
+  sectionRelevanceBoost,
+  termOverlapScore,
+} from "./search";
 import { vectorSearch } from "@/lib/db/queries";
-import { extractKeywords } from "@/lib/documents/normalize";
-import { TECH_KEYWORDS } from "@/lib/constants";
 import type { RetrievedChunk } from "@/lib/types";
-
-function keywordBoostScore(
-  content: string,
-  queryKeywords: string[],
-): number {
-  if (queryKeywords.length === 0) return 0;
-  const lower = content.toLowerCase();
-  let hits = 0;
-  for (const kw of queryKeywords) {
-    if (lower.includes(kw)) hits++;
-  }
-  return hits / queryKeywords.length;
-}
 
 function rerankChunks(
   rows: Awaited<ReturnType<typeof vectorSearch>>,
   query: string,
 ): RetrievedChunk[] {
-  const queryKeywords = [
-    ...extractKeywords(query),
-    ...query
-      .toLowerCase()
-      .split(/\W+/)
-      .filter((w) =>
-        TECH_KEYWORDS.some((t) => t.includes(w) || w.includes(t)),
-      ),
-  ];
-
-  const uniqueKeywords = Array.from(new Set(queryKeywords));
+  const queryTerms = extractQueryTerms(query);
 
   return rows
     .map((row) => {
       const vectorScore = 1 - Number(row.distance);
-      const keywordScore = keywordBoostScore(row.content, uniqueKeywords);
+      const keywordScore = termOverlapScore(row.content, queryTerms);
+      const sectionBoost = sectionRelevanceBoost(row.section, query);
       const requiredBoost =
         row.section?.toLowerCase().includes("required") ||
-        row.section?.toLowerCase().includes("skills")
-          ? 0.05
+        row.section?.toLowerCase().includes("skill")
+          ? 0.04
           : 0;
-      const score = vectorScore * 0.75 + keywordScore * 0.2 + requiredBoost;
+      const score =
+        vectorScore * 0.65 +
+        keywordScore * 0.25 +
+        sectionBoost +
+        requiredBoost;
 
       return {
         chunkId: row.chunk_id,
@@ -52,7 +37,7 @@ function rerankChunks(
         documentType: row.document_type as RetrievedChunk["documentType"],
         section: row.section,
         content: row.content,
-        score,
+        score: Math.min(score, 1),
       };
     })
     .sort((a, b) => b.score - a.score);
@@ -65,15 +50,19 @@ export async function retrieveContext(params: {
   documentIds?: string[];
   limit?: number;
 }): Promise<RetrievedChunk[]> {
+  const isBroadComparison =
+    /best fit|compare|which job|strongest|all job/i.test(params.query);
+  const limit = params.limit ?? (isBroadComparison ? 16 : 12);
+
   const queryEmbedding = await embedText(params.query);
   const rows = await vectorSearch({
     queryEmbedding,
     sessionId: params.sessionId,
     documentTypes: params.documentTypes,
     documentIds: params.documentIds,
-    limit: (params.limit ?? 12) * 2,
+    limit: limit * 2,
   });
 
   const reranked = rerankChunks(rows, params.query);
-  return reranked.slice(0, params.limit ?? 12);
+  return reranked.slice(0, limit);
 }
